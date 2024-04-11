@@ -1,0 +1,112 @@
+{
+    "redisUrl": "redis://127.0.0.1:6379",
+    "ethers": {
+        "wssUrl": "wss://bsc-mainnet.core.chainstack.com/ws/a6129c459652fb83901890002fd38311",
+        "quoterAddress": "0xd92e49bbed29487a89c0aabf7ed7a66578c19047"
+    },
+    "symbolTransform": {
+        "CGPT/BUSD": "CGPT/USDT"
+    },
+    "amms": [
+        {
+            "connector": "pancakeswapv3",
+            "symbol": "USDT/BUSD",
+            "baseAsset": "USDT",
+            "quoteAsset": "BUSD",
+            "amount": "1000",
+            "fees": [
+                100
+            ]
+        },
+        {
+            "connector": "pancakeswap",
+            "symbol": "RACA/BUSD",
+            "baseAsset": "RACA",
+            "quoteAsset": "BUSD",
+            "amount": "2000000"
+        },
+        {
+            "connector": "pancakeswapv3",
+            "symbol": "CGPT/USDT",
+            "baseAsset": "CGPT",
+            "quoteAsset": "USDT",
+            "amount": "2000",
+            "fees": [
+                500
+            ]
+        },
+        {
+            "connector": "pancakeswapv3",
+            "symbol": "AIOZ/BNB",
+            "baseAsset": "AIOZ",
+            "quoteAsset": "WBNB",
+            "amount": "1200",
+            "fees": [
+                2500
+            ]
+        },
+        {
+            "connector": "pancakeswap",
+            "symbol": "RACA/BUSD",
+            "baseAsset": "RACA",
+            "quoteAsset": "BUSD",
+            "amount": "1300000"
+        },
+        {
+            "connector": "pancakeswap",
+            "symbol": "DAO/USDT",
+            "baseAsset": "DAO",
+            "quoteAsset": "USDT",
+            "amount": "300"
+        },
+        {
+            "connector": "pancakeswapv3",
+            "symbol": "DAO/USDT",
+            "baseAsset": "DAO",
+            "quoteAsset": "USDT",
+            "amount": "300",
+            "fees": [
+                100
+            ]
+        },
+        {
+            "connector": "pancakeswap",
+            "symbol": "AGI/USDT",
+            "baseAsset": "AGI",
+            "quoteAsset": "USDT",
+            "amount": "2000"
+        },
+        {
+            "connector": "raydiumv4",
+            "symbol": "RACA/BUSD",
+            "baseAsset": "RAY",
+            "quoteAsset": "USDT",
+            "amount": "200",
+            "pairKeys": "DVa7Qmb5ct9RCpaU7UTpSaf3GVMYz17vNVU67XpdCRut"
+        },
+        {
+            "connector": "raydiumv4",
+            "symbol": "BOME/SOL",
+            "baseAsset": "BOME",
+            "quoteAsset": "SOL",
+            "amount": "10000",
+            "pairKeys": "DSUvc5qf5LJHHV5e2tD184ixotSnCnwj7i4jJa4Xsrmt"
+        },
+        {
+            "connector": "raydiumv4",
+            "symbol": "WIF/SOL",
+            "baseAsset": "WIF",
+            "quoteAsset": "SOL",
+            "amount": "100",
+            "pairKeys": "EP2ib6dYdEeqD8MfE2ezHCxX3kP3K2eLKkirfPm5eyMx"
+        },
+        {
+            "connector": "raydiumv4",
+            "symbol": "MEW/SOL",
+            "baseAsset": "MEW",
+            "quoteAsset": "SOL",
+            "amount": "10000",
+            "pairKeys": "879F697iuDJGMevRkRcnW21fcXiAeLJK1ffsw2ATebce"
+        }
+    ]
+}
