@@ -2,7 +2,6 @@ const config = require('./config/fetch_price_config.json')
 const { Connection, PublicKey } = require('@solana/web3.js')
 const { Liquidity, Market, Percent, Token, TokenAmount } = require('@raydium-io/raydium-sdk')
 // const redis = require('redis')
-const raydiumV4 = require('./raydiumV4/raydiumV4.js')
 
 const chainName = 'sol'
 const bookPrefix = 'amm:'
@@ -246,7 +245,7 @@ async function compute(connection, poolKeysList, new_pool_keys_array) {
 }
 
 // bot need's data;
-function priceDataTransfer({ result, timestamp }, tokenJson) {
+function priceDataTransfer(result, tokenJson, timestamp) {
   let [bidsInfo, asksInfo] = result || [[], []]
   // [amountOut,minAmountOut,currentPrice,executionPrice,priceImpact,fee,amountIn];
   let bidsPrice = bidsInfo?.[0]?.toFixed() / tokenJson?.amount
@@ -276,35 +275,11 @@ function pushToRedis(data) {
 }
 
 // main
-// async function main() {
-//   try {
-//     const { pool_keys_array, connection } = await init()
-//     // to fetch
-//     await fetchPoolInfo(pool_keys_array, config_tokenArr, connection)
-//   } catch (error) {
-//     console.error('Error during computations:', error)
-//   }
-// }
-
 async function main() {
   try {
-    let value = []
-    let results = await raydiumV4.fetchPrice(config_tokenArr)
-    results.forEach((result, idx) => {
-      value.push(priceDataTransfer(result, config_tokenArr[idx]))
-    })
-    // pushData
-    const pushData = {
-      chainName: 'sol',
-      value,
-    }
-    console.log(`\n`)
-    console.dir(pushData, { depth: null, colors: true })
-    // End
-    //  console.log(`\n`, 'cost', endTime - beginCompute, 'ms')
-
-    console.log(`\n -------------------------------------`)
-    // ---
+    const { pool_keys_array, connection } = await init()
+    // to fetch
+    await fetchPoolInfo(pool_keys_array, config_tokenArr, connection)
   } catch (error) {
     console.error('Error during computations:', error)
   }
