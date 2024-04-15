@@ -3,6 +3,7 @@ const { Connection, PublicKey } = require('@solana/web3.js')
 const { Liquidity, Market, Percent, Token, TokenAmount } = require('@raydium-io/raydium-sdk')
 // const redis = require('redis')
 const raydiumV4 = require('./raydiumV4/raydiumV4.js')
+const raydiumCLMM = require('./raydiumCLMM/raydiumCLMM.js')
 
 const chainName = 'sol'
 const bookPrefix = 'amm:'
@@ -248,6 +249,7 @@ async function compute(connection, poolKeysList, new_pool_keys_array) {
 // bot need's data;
 function priceDataTransfer({ result, timestamp }, tokenJson) {
   let [bidsInfo, asksInfo] = result || [[], []]
+  debugger
   // [amountOut,minAmountOut,currentPrice,executionPrice,priceImpact,fee,amountIn];
   let bidsPrice = bidsInfo?.[0]?.toFixed() / tokenJson?.amount
   let asksPrice = asksInfo?.[0]?.toFixed() / tokenJson?.amount
@@ -286,7 +288,7 @@ function pushToRedis(data) {
 //   }
 // }
 
-async function main() {
+async function main1() {
   try {
     let value = []
     let results = await raydiumV4.fetchPrice(config_tokenArr)
@@ -310,4 +312,23 @@ async function main() {
   }
 }
 
-main()
+async function main2() {
+  try {
+    let value = []
+    let config_tokenArr = config?.amms?.filter((i) => i?.connector == 'raydiumv5') || []
+    let results = await raydiumCLMM.fetchPrice(config_tokenArr)
+
+    results.forEach((result, idx) => {
+      value.push(priceDataTransfer(result, config_tokenArr[idx]))
+    })
+    console.log(`\n`)
+    console.dir(value, { depth: null, colors: true })
+    // End
+    console.log(`\n -------------------------------------`)
+    // ---
+  } catch (error) {
+    console.error('Error during computations:', error)
+  }
+}
+
+main2()
