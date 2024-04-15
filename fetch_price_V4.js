@@ -256,10 +256,10 @@ function priceDataTransfer({ result, timestamp }, tokenJson) {
 
   let resultTokenInfo = {
     pairAddress: tokenJson?.pairKeys,
-    pairFee: bidsInfo?.[5]?.toFixed(),
+    // pairFee: bidsInfo?.[5]?.toFixed(),
     asks: [[asksPrice?.toFixed(9), tokenJson?.amount, timestamp]],
     bids: [[bidsPrice?.toFixed(9), tokenJson?.amount, timestamp]],
-    pair: [tokenJson?.baseAsset, tokenJson?.quoteAsset, 'token_in_key', 'token_out_key'],
+    pair: [tokenJson?.baseAsset, tokenJson?.quoteAsset],
     baseCurrency: tokenJson?.baseAsset,
     quoteCurrency: tokenJson?.quoteAsset,
     timestamp: timestamp,

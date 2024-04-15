@@ -1,10 +1,4 @@
 const {
-  Currency,
-  LOOKUP_TABLE_CACHE,
-  MAINNET_PROGRAM_ID,
-  RAYDIUM_MAINNET,
-  TOKEN_PROGRAM_ID,
-  TxVersion,
   Liquidity,
   Market,
   Percent,
@@ -18,10 +12,6 @@ const {
 } = require('@raydium-io/raydium-sdk')
 const { Connection, PublicKey } = require('@solana/web3.js')
 const connection = new Connection('https://api.mainnet-beta.solana.com/')
-// const programId = MAINNET_PROGRAM_ID?.AmmV4
-// const serumProgramId = MAINNET_PROGRAM_ID?.OPENBOOK_MARKET
-// const serumVersion = 10
-// const marketVersion = 3
 
 // init get AMM Keys
 const formatAmmKeysById = async (id) => {
@@ -142,13 +132,12 @@ const compute = async (poolKeysList, config_tokenArr) => {
 }
 
 // public fetchPrice function
-const fetchPrice = async (config_tokenArr) => {
+const fetchPoolInfos = async (config_tokenArr) => {
   const poolKeysList = await formatAmmKeysByIdToApi(config_tokenArr?.map((i) => i.pairKeys))
-  const results = await poolInfoToCompute(poolKeysList, config_tokenArr)
-  return results
+  return poolKeysList
 }
 
 module.exports = {
-  fetchPrice,
+  fetchPoolInfos,
   poolInfoToCompute,
 }

@@ -1,22 +1,9 @@
 const {
-  Currency,
-  LOOKUP_TABLE_CACHE,
   MAINNET_PROGRAM_ID,
-  RAYDIUM_MAINNET,
-  TOKEN_PROGRAM_ID,
-  TxVersion,
-  Liquidity,
-  Market,
   Percent,
   Token,
   TokenAmount,
-  LIQUIDITY_STATE_LAYOUT_V4,
-  LIQUIDITY_STATE_LAYOUT_V5,
-  MARKET_STATE_LAYOUT_V3,
-  SPL_MINT_LAYOUT,
-  TradeV2,
   Clmm,
-  jsonInfo2PoolKeys,
   AmmConfigLayout,
   PoolInfoLayout,
   fetchMultipleMintInfos,
@@ -144,12 +131,18 @@ const compute = async (clmmPools, config_tokenArr) => {
         const currency = new Token(MAINNET_PROGRAM_ID.CLMM, curr_out, out_decimal)
         const slippage = new Percent(0, 100)
 
-        const result = Clmm.computeAmountOutFormat({
-          poolInfo: poolInfo,
+        // out
+        const amountInIsTokenAmount = amountToken instanceof TokenAmount
+        const inputMint = (amountInIsTokenAmount ? amountToken.token : Token.WSOL).mint
+        const _amountIn = amountToken.raw
+        const _slippage = slippage.numerator.toNumber() / slippage.denominator.toNumber()
+
+        const bids = Clmm.computeAmountOut({
+          poolInfo,
           tickArrayCache: tickCache[config_tokenArr?.[idx]?.pairKeys],
-          amountIn: amountToken,
-          currencyOut: currency,
-          slippage: slippage,
+          baseMint: inputMint,
+          amountIn: _amountIn,
+          slippage: _slippage,
           epochInfo: await connection.getEpochInfo(),
           token2022Infos: await fetchMultipleMintInfos({
             connection,
@@ -166,16 +159,47 @@ const compute = async (clmmPools, config_tokenArr) => {
           }),
           catchLiquidityInsufficient: false,
         })
-        const { amountOut, minAmountOut, currentPrice, executionPrice, priceImpact, fee } = result
+
+        const asks = Clmm.computeAmountIn({
+          poolInfo,
+          tickArrayCache: tickCache[config_tokenArr?.[idx]?.pairKeys],
+          baseMint: inputMint,
+          amountOut: _amountIn,
+          slippage: _slippage,
+          epochInfo: await connection.getEpochInfo(),
+          token2022Infos: await fetchMultipleMintInfos({
+            connection,
+            mints: [
+              ...clmmPools
+                .map((i) => [
+                  { mint: i.mintA, program: i.mintProgramIdA },
+                  { mint: i.mintB, program: i.mintProgramIdB },
+                ])
+                .flat()
+                .filter((i) => i.program === TOKEN_2022_PROGRAM_ID.toString())
+                .map((i) => new PublicKey(i.mint)),
+            ],
+          }),
+          catchLiquidityInsufficient: false,
+        })
+
         return {
           result: [
             Object.values({
-              amountOut:amountOut?.amount,
-              minAmountOut:minAmountOut?.amount,
-              currentPrice,
-              executionPrice,
-              priceImpact,
-              fee,
+              amountOut: new TokenAmount(currency, bids?.amountOut?.amount),
+              minAmountOut: new TokenAmount(currency, bids?.minAmountOut?.amount),
+              currentPrice: bids?.currentPrice,
+              executionPrice: bids?.executionPrice,
+              priceImpact: bids?.priceImpact,
+              fee: bids?.fee,
+            }),
+            Object.values({
+              amountIn: new TokenAmount(currency, asks?.amountIn?.amount),
+              maxAmountIn: new TokenAmount(currency, asks?.maxAmountIn?.amount),
+              currentPrice: asks?.currentPrice,
+              executionPrice: asks?.executionPrice,
+              priceImpact: asks?.priceImpact,
+              fee: asks?.fee,
             }),
           ],
           timestamp: Date.now(),
@@ -190,13 +214,12 @@ const compute = async (clmmPools, config_tokenArr) => {
 }
 
 // public fetchPrice function
-const fetchPrice = async (config_tokenArr) => {
+const fetchPoolInfos = async (config_tokenArr) => {
   const poolKeysList = await formatClmmKeysByIdToApi(config_tokenArr?.map((i) => i.pairKeys))
-  const results = await poolInfoToCompute(poolKeysList, config_tokenArr)
-  return results
+  return poolKeysList
 }
 
 module.exports = {
-  fetchPrice,
+  fetchPoolInfos,
   poolInfoToCompute,
 }
