@@ -10,7 +10,8 @@
     "decimal.js": "^10.4.3",
     "node-cron": "^3.0.3",
     "ts-node": "^10.9.2",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.5",
