@@ -1,0 +1,91 @@
+const {
+  Keypair,
+  PublicKey,
+  clusterApiUrl,
+  Connection,
+  TransactionInstruction,
+  SystemProgram,
+  TransactionMessage,
+  VersionedTransaction,
+} = require('@solana/web3.js')
+const bip39 = require('bip39')
+
+// Constants
+const PROGRAM_ID = new PublicKey('721v6F7kPhKoysprtn5d41k6vUYjbsGsQcB4D3Ac8Goc') // Replace with actual program ID
+const NETWORK = 'https://devnet.sonic.game' || clusterApiUrl('devnet')
+const WALLET_MNEMONIC = 'radio village banner office miss assault require multiply aisle blind squeeze off' // Replace with your wallet mnemonic
+
+// Create Keypair from mnemonic
+const createKeypairFromMnemonic = (mnemonic) => {
+  const seed = bip39.mnemonicToSeedSync(mnemonic).slice(0, 32)
+  return Keypair.fromSeed(seed)
+}
+
+// Initialize connection
+const connection = new Connection(NETWORK, 'confirmed')
+
+// Create wallet from mnemonic
+const wallet = createKeypairFromMnemonic(WALLET_MNEMONIC)
+
+// Function to call the smart contract
+const callSmartContract = async () => {
+  try {
+    // Define the account to be used
+    const myAccount = Keypair.generate()
+
+    // Define the instruction data
+    const instructionData = Buffer.from([
+      /* ... your instruction data here ... */
+      {
+        magicNumber: 'e121c601',
+        timestamp: 1510913242,
+        stringLength: 7,
+        stringData: '4f647973736579',
+        flags: 'fcfffb',
+        someNumber: 1,
+        someString: 'Show',
+      },
+    ])
+
+    // Create the transaction instruction
+    const instruction = new TransactionInstruction({
+      keys: [
+        { pubkey: myAccount.publicKey, isSigner: true, isWritable: true },
+        { pubkey: wallet.publicKey, isSigner: false, isWritable: true },
+        // { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+      ],
+      programId: PROGRAM_ID,
+      data: instructionData,
+    })
+
+    // Create a versioned transaction message
+    const messageV0 = new TransactionMessage({
+      payerKey: wallet.publicKey,
+      recentBlockhash: (await connection.getRecentBlockhash()).blockhash,
+      instructions: [instruction],
+    }).compileToV0Message()
+
+    // Create a versioned transaction
+    const transaction = new VersionedTransaction(messageV0)
+
+    // Sign the transaction
+    transaction.sign([wallet, myAccount])
+
+    // Send and confirm the transaction
+    const signature = await connection.sendTransaction(transaction, {
+      skipPreflight: false,
+      preflightCommitment: 'confirmed',
+    })
+
+    console.log('Transaction signature:', signature)
+
+    // Optionally fetch and log the account data
+    const accountInfo = await connection.getAccountInfo(myAccount.publicKey)
+    console.log('Account info:', accountInfo)
+  } catch (error) {
+    console.error('Error calling smart contract:', error)
+  }
+}
+
+// Call the function
+callSmartContract()
