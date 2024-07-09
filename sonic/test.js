@@ -34,11 +34,11 @@ let useFunction = async (pay) => {
     //获取最近区块信息，交易里面需要
     let key = { pubkey: pay.publicKey, isSigner: false, isWritable: false }
     let keys = [
-      { pubkey: myAccount.publicKey, isSigner: false, isWritable: true },
+      // { pubkey: myAccount.publicKey, isSigner: false, isWritable: true },
       { pubkey: pay.publicKey, isSigner: true, isWritable: true },
       { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
     ]
-    const data = Buffer.from('e121c6015a833e5a070000004f647973736579fcfffb0100000033', 'hex')
+    const data = Buffer.from('0eacaa412bde7a47', 'hex')
     // 构建数据负载（包括指令标识符和其他数据）
     // const data = Buffer.concat([
     //   instructionIdentifier,
@@ -47,7 +47,7 @@ let useFunction = async (pay) => {
     // let data = Buffer.from(['OpenMysteryBox'])
     //
     let instruction = new TransactionInstruction({
-      programId: new PublicKey('721v6F7kPhKoysprtn5d41k6vUYjbsGsQcB4D3Ac8Goc'), //程序地址
+      programId: new PublicKey('73f1XgGUZQmMkqymvaswgMpQvLuFc2GX5zMgonCK951J'), //程序地址
       keys: keys, //合约里面使用的账号信息
       data: data, //传给合约的参数
     })

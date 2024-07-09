@@ -13,9 +13,10 @@ const { derivePath } = require('ed25519-hd-key')
 const XLSX = require('xlsx')
 const path = require('path')
 const fs = require('fs')
+const axios = require('axios')
 
 // 获取绝对路径
-const keysFilePath = path.resolve(__dirname, './sonic.xlsx')
+const keysFilePath = path.resolve(__dirname, './sonic222.xlsx')
 let output = path.resolve(__dirname, `./sonic_error_log_${new Date().getTime()}.txt`)
 
 if (!fs.existsSync(keysFilePath)) {
@@ -26,9 +27,9 @@ const keysWorkbook = XLSX.readFile(keysFilePath, { cellStyles: true })
 const keysSheet = keysWorkbook.Sheets[keysWorkbook.SheetNames[0]]
 let keysData = XLSX.utils.sheet_to_json(keysSheet, { header: 1 })
 //
-const BATCH_SIZE = 2 // 每批处理2条记录
+const BATCH_SIZE = 10 // 每批处理2条记录
 const TOTAL_ROWS = keysData.length // 总记录数
-const maxCount = 3 // 交易次数
+const maxCount = 50 // 交易次数
 const maxFailures = 1 // 最大失败次数
 
 const connect = new Connection('https://devnet.sonic.game', 'confirmed')
@@ -56,7 +57,7 @@ let toTransaction = async (pay, count) => {
   // 获取公钥（用户地址）
   const publicKey = keypair.publicKey.toString()
   //
-  let toPubkey = new PublicKey(publicKey)
+  let toPubkey = new PublicKey('CDCwW4quEgZBHxkoBN2bdNukd4dDusFHKCtR8VWVTHnZ')
   let amount = parseInt(10000000 * parseFloat(Math.random().toFixed(2)))
   //
   try {
@@ -79,8 +80,20 @@ let toTransaction = async (pay, count) => {
     let transaction = new VersionedTransaction(messageV0)
     transaction.sign([pay]) // 签名
     let result = await connect.sendTransaction(transaction) // 发起交易
-    console.info(`【${pay.publicKey.toBase58()}】- 第${count + 1}次交易：`)
-    console.log(`Success! To ${publicKey} Send ${amount / LAMPORTS_PER_SOL}Sol \n`)
+    // POST 请求示例
+    let res = await axios.post(
+      'https://odyssey-api.sonic.game/user/lottery/draw',
+      { hash: result },
+      {
+        headers: {
+          Authorization:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mjg5OTY1LCJ3YWxsZXQiOiI0czQ4b2lydUhNQlozbjgxMk5KdEZjR3dVcjVpRGpzUWFDSHZxaWtnb25hZSIsImludml0YXRpb25fY29kZSI6IkJZSHlxTyIsImlhdCI6MTcyMDUxNzI3MiwiZXhwIjoxNzI4MjkzMjcyLCJqdGkiOiJzb25pY19hdXRoX3VzZXJfMjg5OTY1In0.NQjiUEayZ8eSYnnZzZO779NufGbWkLuAqR1K5YmomMI',
+          'Content-Type': 'application/json',
+        },
+      }
+    )
+    console.info(`【${pay.publicKey.toBase58()}】- 第${count + 1}次交易：` + res?.data?.status)
+    // console.log(`Success! To ${publicKey} Send ${amount / LAMPORTS_PER_SOL}Sol \n`)
     return { success: true, result }
   } catch (err) {
     console.info(`【${pay.publicKey.toBase58()}】- 第${count + 1}次交易：`)
@@ -100,7 +113,7 @@ let whileFun = async (pay, terminationLogs) => {
       count++
     }
 
-    let time = 5000 + Math.random() * 5000
+    let time = 1000 + Math.random() * 5000
     await new Promise((resolve) => setTimeout(resolve, time))
   }
   if (failCount >= maxFailures) {
@@ -128,7 +141,7 @@ async function processBatch(startRow, endRow, processFunction, terminationLogs) 
     // console.log('Public Key:', pay.publicKey.toBase58())
 
     // 随机延迟执行
-    const delay = 2000 + Math.random() * 2000
+    const delay = Math.random() * 1000
     await new Promise((resolve) => setTimeout(resolve, delay))
     return processFunction(pay, terminationLogs)
   })
